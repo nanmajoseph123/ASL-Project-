@@ -1,0 +1,119 @@
+package com.example.demoapp;
+
+import android.app.Service;
+import android.content.Intent;
+import android.os.Bundle;
+import android.text.Editable;
+import android.view.Menu;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.content.ActivityNotFoundException;
+import android.content.Intent;
+import android.speech.RecognizerIntent;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.appcompat.app.AppCompatActivity;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
+import java.util.ArrayList;
+import java.util.Locale;
+import androidx.appcompat.app.AppCompatActivity;
+
+
+
+
+public class MainActivity extends AppCompatActivity {
+    //viewing objects
+    Button btn;
+    EditText et;
+    String st;
+    ImageView iv,speakbtn;
+    private final int REQ_CODE = 100;
+    //Variables for translation and display
+    int phraseIndex=0;
+    String letters;
+    String display;
+
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        btn=findViewById(R.id.Button);
+        speakbtn=findViewById(R.id.speak);
+        et=findViewById(R.id.edittext);
+        iv=findViewById(R.id.imagetranslate);
+        //selecting the text typed in the input
+        et.setSelectAllOnFocus(true);
+        btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i=new Intent(MainActivity.this,ImageScroll.class);
+                st=et.getText().toString();
+                i.putExtra( "Value",st);
+                startActivity(i);
+                finish();
+
+
+            }
+        });
+
+        speakbtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                        RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
+                intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Start speaking");
+                try {
+                    startActivityForResult(intent, REQ_CODE);
+                } catch (ActivityNotFoundException a) {
+                    Toast.makeText(getApplicationContext(),
+                            "Sorry your device not supported",
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        //Inflate the menu----adding items to the action bar if present
+        getMenuInflater().inflate(R.menu.activity_main,menu);
+        return true;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode)
+        {
+            case REQ_CODE:
+            {
+                if (resultCode == RESULT_OK && data!= null)
+                {
+                    ArrayList <String>result = data
+                            .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                    et.setText(result.get(0));
+                }
+                break;
+            }
+        }
+    }
+
+
+
+
+}
+
+
